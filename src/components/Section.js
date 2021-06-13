@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 // Skeletons add a gray bar when the text is loading, is better than a spinner for texts
 import Skeleton from 'react-loading-skeleton'
-import { gql, useQuery } from '@apollo/client'
+import { gql, useQuery, useMutation } from '@apollo/client'
 import get from 'lodash/get'
 import { useLocation } from 'react-router'
 import { deslugify } from '../lib/helpers'
@@ -10,7 +10,9 @@ import { pick } from 'lodash'
 const SECTION_BY_ID_QUERY = gql`
   query SectionContent($id: String!) {
     section(id: $id) {
+      id
       content
+      views
     }
   }
 `
@@ -20,7 +22,9 @@ const SECTION_BY_CHAPTER_TITLE_QUERY = gql`
     chapterByTitle(title: $title) {
       title
       section(number: 1) {
+        id
         content
+        views
       }
     }
   }
@@ -31,10 +35,21 @@ const SECTION_BY_NUMBER_QUERY = gql`
     chapterByNumber(number: $chapterNumber) {
       number
       section(number: $sectionNumber) {
+        id
         number
         title
         content
+        views
       }
+    }
+  }
+`
+
+const VIEWED_SECTION_MUTATION = gql`
+  mutation ViewedSection($id: String!) {
+    viewedSection(id: $id) {
+      id
+      views
     }
   }
 `
@@ -66,7 +81,8 @@ export default () => {
     case SECTION_BY_ID_QUERY:
       section = {
         ...state.section,
-        content: get(data, 'section.content')
+        content: get(data, 'section.content'),
+        views: get(data, 'section.views'),
       }
       chapter = state.chapter
       break
@@ -83,7 +99,23 @@ export default () => {
       break
   }
 
-  let headerContent = null, sectionContent = null
+  const [viewedSection] = useMutation(VIEWED_SECTION_MUTATION)
+
+  const id = get(section, 'id')
+
+  console.log(id, section, data)
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      viewedSection({ variables: { id } })
+    }, 2000)
+
+    return () => clearTimeout(timeoutId)
+  }, [id, viewedSection])
+
+  let headerContent = null,
+    sectionContent = null,
+    footerContent = null
 
   if (loading) {
     headerContent = (
@@ -116,6 +148,7 @@ export default () => {
     }
 
     sectionContent = section.content
+    footerContent = `Viewed ${section.views.toLocaleString()} times`
   }
 
   return (
@@ -124,6 +157,7 @@ export default () => {
         <header className="Section-header">{headerContent}</header>
       </div>
       <div className="Section-content">{sectionContent}</div>
+      <footer>{footerContent}</footer>
     </section>
   )
 }

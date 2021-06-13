@@ -10,6 +10,9 @@ export const USER_QUERY = gql`
       email
       photo
       hasPurchased
+      favoriteReviews {
+        id
+      }
     }
   }
 `

@@ -86,6 +86,11 @@ export default () => {
               </li>
             )
           })}
+          <li>
+            <NavLink className="TableOfContents-reviews-link" to="/reviews">
+              Reviews
+            </NavLink>
+          </li>
         </ul>
       )}
     </nav>
