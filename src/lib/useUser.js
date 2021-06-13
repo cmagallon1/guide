@@ -18,9 +18,7 @@ export const USER_QUERY = gql`
 `
 
 export function useUser() {
-  const { data, loading } = useQuery(USER_QUERY, {
-    fetchPolicy: 'cache-and-network'
-  })
+  const { data, loading } = useQuery(USER_QUERY)
 
   return {
     user: data && data.currentUser,

@@ -30,8 +30,45 @@ const FAVORITE_REVIEW_MUTATION = gql`
   }
 `
 
+const READ_USER_FAVORITES = gql`
+  query ReadUserFavorites {
+    currentUser {
+      id
+      favoriteReviews {
+        id
+      }
+    }
+  }
+`
+
 const FavoriteButton = ({ id, favorited }) => {
-  const [favorite] = useMutation(FAVORITE_REVIEW_MUTATION)
+  const [favorite] = useMutation(FAVORITE_REVIEW_MUTATION, {
+    // The update function is to update the cache after a mutation, his arguments are the cache and the result of the mutation
+    update: (cache, { data: { favoriteReview } }) => {
+      const { currentUser } = cache.readQuery({ query: READ_USER_FAVORITES })
+      let newUser
+
+      if (favoriteReview.favorited) {
+        newUser = {
+          ...currentUser,
+          favoriteReviews: [
+            ...currentUser.favoriteReviews,
+            { id, __typename: 'Review' },
+          ],
+        }
+      } else {
+        newUser = {
+          ...currentUser,
+          favoriteReviews: currentUser.favoriteReviews.filter(review => review.id !== id),
+        }
+      }
+
+      cache.writeQuery({
+        query: READ_USER_FAVORITES,
+        data: { currentUser: newUser }
+      })
+    }
+  })
 
   function toggleFavorite() {
     favorite({

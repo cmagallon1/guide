@@ -6,11 +6,21 @@ import { apollo } from './lib/apollo'
 
 import './index.css'
 import App from './components/App'
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core'
+
+const GRAPHQL_PINK = '#e10098'
+
+const theme = createMuiTheme({
+  palette: { primary: { main: GRAPHQL_PINK } },
+  typography: { useNextVariants: true },
+})
 
 render(
   <BrowserRouter>
     <ApolloProvider client={apollo}>
-      <App />
+      <MuiThemeProvider theme={theme}>
+        <App />
+      </MuiThemeProvider>
     </ApolloProvider>
   </BrowserRouter>,
   document.getElementById('root')
