@@ -6,7 +6,7 @@ import { Star, StarBorder } from '@material-ui/icons'
 import pick from 'lodash/pick'
 
 import { validateReview } from '../lib/validators'
-import { REVIEWS_QUERY } from '../graphql/Review'
+import { REVIEWS_QUERY, REVIEW_ENTRY } from '../graphql/Review'
 import { useUser } from '../lib/useUser'
 
 const GREY = '#0000008a'
@@ -14,19 +14,10 @@ const GREY = '#0000008a'
 const ADD_REVIEW_MUTATION = gql`
   mutation AddReview($input: CreateReviewInput!) {
     createReview(input: $input) {
-      id
-      text
-      stars
-      createdAt
-      favorited
-      author {
-        id
-        name
-        photo
-        username
-      }
+      ...ReviewEntry
     }
   }
+  ${REVIEW_ENTRY}
 `
 
 export default ({ done }) => {
